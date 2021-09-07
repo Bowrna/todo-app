@@ -1,6 +1,7 @@
 from models import Schema
 from service import ToDoService
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+
 
 app = Flask(__name__)
 
@@ -20,6 +21,18 @@ def list_todo():
 @app.route("/todo", methods=["POST"])
 def create_todo():
     return jsonify(ToDoService().create(request.get_json()))
+
+@app.route("/todo/<todo_id>", methods=["DELETE"])
+def delete_todo(todo_id):
+    return jsonify(ToDoService().delete(todo_id))
+
+@app.route("/todo/<todo_id>", methods=["PUT"])
+def update_todo(todo_id):
+    return jsonify(ToDoService().update(todo_id, request.get_json()))
+
+@app.route("/todo/<todo_id>", methods=["GET"])
+def get_todo(todo_id):
+    return jsonify(ToDoService().get(todo_id))
 
 if __name__ == "__main__":
     Schema()

@@ -56,23 +56,15 @@ class ToDoModel:
         self.cursor = self.conn.cursor()
 
     def create(self, text, description):
-        print(text)
-        print(description)
         query = f'insert into {self.TABLENAME}' \
                 f'(Title, Description) ' \
                 f'values ("{text}","{description}")'
-        print(query)
         result = self.cursor.execute(query)
         self.conn.commit()
         self.cursor.close()
         return result.lastrowid
 
     def list_items(self, where_clause=""):
-        # test_query = f"SELECT * " \
-        #         f"from {self.TABLENAME} "
-        # print(test_query)
-        # test_result_set = self.cursor.execute(test_query).fetchall()
-        # print(test_result_set)
         fields = ['id', 'Title', 'Description', 'Is_done']
         todo = namedtuple('todo', fields)
         query = f"SELECT id, Title, Description, _is_done " \
@@ -82,3 +74,44 @@ class ToDoModel:
                   for i, column in enumerate(result_set)]
         return result
 
+    def delete(self, id):
+        # Missing out space can lead to error. Consider using ORM
+        query = f'UPDATE {self.TABLENAME} ' \
+                f'SET _is_deleted = {1} ' \
+                f'WHERE id = {id}'
+        print(query)
+        result = self.cursor.execute(query)
+        self.conn.commit()
+        self.cursor.close()
+        return result.lastrowid
+    
+    def update(self, id, update_params):
+        set_query = ", ".join([f'{column} = {value}'
+                     for column, value in update_params.items()])
+        query = f'UPDATE {self.TABLENAME} ' \
+                f'SET {set_query} ' \
+                f'WHERE id = {id}'
+        result = self.cursor.execute(query)
+        self.conn.commit()
+        self.cursor.close()
+        return self.get_by_id(id)
+
+    def get_by_id(self, id):
+        where_clause = f'AND id={id}'
+        self.list_items(where_clause=where_clause)
+        
+
+class User:
+  TABLENAME = "User"
+  def __init__(self):
+      self.conn = sqlite3.connect('todo.db')
+      self.cursor = self.conn.cursor()
+
+  def create_user(self, email, username):
+        query = f'insert into {self.TABLENAME}' \
+                f'(Email, Name) ' \
+                f'values ("{email}","{username}")'
+        result = self.cursor.execute(query)
+        self.conn.commit()
+        self.cursor.close()
+        return result.lastrowid
